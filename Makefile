@@ -39,9 +39,9 @@ DEBUG = 1
 
 
 # avrdude programmer protocol
-PROG = usbasp
+PROG = stk500v2
 # avrdude programmer device
-DEV = usb
+DEV = /dev/ttyACM0
 # further flags for avrdude
 AVRDUDE_FLAGS =
 
