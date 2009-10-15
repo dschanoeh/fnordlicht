@@ -160,13 +160,18 @@ int main(void) {
 
     #if RS485_CTRL == 0
     /* start the example scripts */
-    script_threads[0].handler.execute = &memory_handler_flash;
-    script_threads[0].handler.position = (uint16_t) &colorchange_red;
-    script_threads[0].flags.disabled = 0;
+    //script_threads[0].handler.execute = &memory_handler_flash;
+    //script_threads[0].handler.position = (uint16_t) &colorchange_red;
+    //script_threads[0].flags.disabled = 0;
 
     //script_threads[1].handler.execute = &memory_handler_flash;
     //script_threads[1].handler.position = (uint16_t) &testscript_flash2;
     //script_threads[1].flags.disabled = 0;
+
+    script_threads[0].handler.execute = &memory_handler_flash;
+    script_threads[0].handler.position = (uint16_t) &blinken;
+    script_threads[0].flags.disabled = 0;
+
     //
     //script_threads[2].handler.execute = &memory_handler_eeprom;
     //script_threads[2].handler.position = (uint16_t) &testscript_eeprom;

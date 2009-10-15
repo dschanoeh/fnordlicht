@@ -5,7 +5,7 @@ ISP_DEV = /dev/parport0
 # Programmer used for serial programming (using the bootloader)
 SERIAL_PROG = avr109
 # device the serial programmer is connected to
-SERIAL_DEV = /dev/ttyS0
+SERIAL_DEV = /dev/ttyUSB0
 
 # programs
 CC = avr-gcc
