@@ -54,6 +54,8 @@
 
 /* structs */
 volatile struct global_t global = {{0, 0}};
+uint8_t mode=MODE_RAINBOW;
+uint8_t last_mode = MODE_NORMAL;
 
 /* prototypes */
 void (*jump_to_bootloader)(void) = (void *)0xc00;
@@ -168,9 +170,9 @@ int main(void) {
     //script_threads[1].handler.position = (uint16_t) &testscript_flash2;
     //script_threads[1].flags.disabled = 0;
 
-    script_threads[0].handler.execute = &memory_handler_flash;
-    script_threads[0].handler.position = (uint16_t) &blinken;
-    script_threads[0].flags.disabled = 0;
+    //script_threads[0].handler.execute = &memory_handler_flash;
+    //script_threads[0].handler.position = (uint16_t) &blinken;
+    //script_threads[0].flags.disabled = 0;
 
     //
     //script_threads[2].handler.execute = &memory_handler_eeprom;
@@ -209,6 +211,8 @@ int main(void) {
     /* enable interrupts globally */
     sei();
 
+
+/*############################ mainloop ########################################*/
     while (1) {
         /* after the last pwm timeslot, rebuild the timeslot table */
         if (global.flags.last_pulse) {
@@ -226,9 +230,53 @@ int main(void) {
 #if STATIC_SCRIPTS
             execute_script_threads();
 #endif
+            switch(mode) {
+                case MODE_NORMAL:
+                    break;
+                /* slowly fade through the rainbow colors */
+                case MODE_RAINBOW:
+                    if(last_mode != MODE_RAINBOW) {
+                         script_threads[0].handler.execute = &memory_handler_flash;
+                         script_threads[0].handler.position = (uint16_t) &mood_chill;
+                         script_threads[0].flags.disabled = 0;
+                         last_mode = MODE_RAINBOW;
+                    }
+                    break;
+                case MODE_MORNING:
+                    if(last_mode != MODE_MORNING) {
+                         script_threads[0].handler.execute = &memory_handler_flash;
+                         script_threads[0].handler.position = (uint16_t) &mood_morning;
+                         script_threads[0].flags.disabled = 0;
+                         last_mode = MODE_MORNING;
+                    }
+                    break;
+                case MODE_DAY:
+                    if(last_mode != MODE_DAY) {
+                         script_threads[0].handler.execute = &memory_handler_flash;
+                         script_threads[0].handler.position = (uint16_t) &mood_day;
+                         script_threads[0].flags.disabled = 0;
+                         last_mode = MODE_DAY;
+                    }
+                    break;
 
+                /*display a single color which can be changed via remote*/
+                case MODE_FIXED:
+                    if(last_mode != MODE_FIXED) {
+                         script_threads[0].flags.disabled = 1;
+                         script_threads[1].flags.disabled = 1;
+                         script_threads[2].flags.disabled = 1;
+                         last_mode = MODE_FIXED;
+                    }
+                    break;
+                
+
+            }
             continue;
         }
+
+
+
+
 
 
 #if SERIAL_UART

@@ -41,3 +41,14 @@ struct global_t {
 };
 
 extern volatile struct global_t global;
+extern uint8_t mode;
+
+#define MODE_NORMAL 	0
+#define MODE_RANDOM 	1
+#define MODE_PGM1 	2
+#define MODE_PGM2 	3
+#define MODE_FIXED 	4
+#define MODE_RAINBOW 	5
+#define MODE_CHILL	6
+#define MODE_MORNING	7
+#define MODE_DAY	8
