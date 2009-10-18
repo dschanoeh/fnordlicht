@@ -66,6 +66,24 @@ extern volatile struct global_rc5_t global_rc5;
 /* prototypes */
 void init_rc5(void);
 
+
+#define REMOTE_0 16
+#define REMOTE_1 17
+#define REMOTE_2 18
+#define REMOTE_3 19
+#define REMOTE_4 20
+#define REMOTE_5 21
+#define REMOTE_6 22
+#define REMOTE_7 23
+#define REMOTE_8 24
+#define REMOTE_9 25
+#define REMOTE_MUTE 43
+#define REMOTE_VU 36
+#define REMOTE_VD 37
+#define REMOTE_CU 27
+#define REMOTE_CD 28
+#define REMOTE_POWER 32
+
 #endif
 
 #endif

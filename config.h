@@ -125,7 +125,7 @@
 
 /* disable rc5-decoder per default */
 #ifndef RC5_DECODER
-#define RC5_DECODER 0
+#define RC5_DECODER 1
 #endif
 
 /* disable scripts speed control per default */

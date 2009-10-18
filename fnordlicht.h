@@ -48,7 +48,7 @@ extern uint8_t mode;
 #define MODE_PGM1 	2
 #define MODE_PGM2 	3
 #define MODE_FIXED 	4
-#define MODE_RAINBOW 	5
+#define MODE_OFF        5
 #define MODE_CHILL	6
 #define MODE_MORNING	7
 #define MODE_DAY	8

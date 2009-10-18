@@ -39,6 +39,8 @@
 #include "uart.h"
 #include "i2c.h"
 
+#include <avr/sleep.h>
+
 #if RC5_DECODER
 #include "rc5.h"
 #endif
@@ -54,7 +56,7 @@
 
 /* structs */
 volatile struct global_t global = {{0, 0}};
-uint8_t mode=MODE_RAINBOW;
+uint8_t mode=MODE_CHILL;
 uint8_t last_mode = MODE_NORMAL;
 
 /* prototypes */
@@ -139,6 +141,7 @@ void check_serial_input(uint8_t data)
 /** main function
  */
 int main(void) {
+    uint16_t off_count=0;
     init_output();
     init_pwm();
 
@@ -234,12 +237,12 @@ int main(void) {
                 case MODE_NORMAL:
                     break;
                 /* slowly fade through the rainbow colors */
-                case MODE_RAINBOW:
-                    if(last_mode != MODE_RAINBOW) {
+                case MODE_CHILL:
+                    if(last_mode != MODE_CHILL) {
                          script_threads[0].handler.execute = &memory_handler_flash;
                          script_threads[0].handler.position = (uint16_t) &mood_chill;
                          script_threads[0].flags.disabled = 0;
-                         last_mode = MODE_RAINBOW;
+                         last_mode = MODE_CHILL;
                     }
                     break;
                 case MODE_MORNING:
@@ -268,7 +271,24 @@ int main(void) {
                          last_mode = MODE_FIXED;
                     }
                     break;
-                
+                case MODE_OFF:
+                    if(last_mode != MODE_OFF) {
+                         off_count=0;
+                         script_threads[0].flags.disabled = 1;
+                         script_threads[1].flags.disabled = 1;
+                         script_threads[2].flags.disabled = 1;
+                         script_threads[0].handler.execute = &memory_handler_flash;
+                         script_threads[0].handler.position = (uint16_t) &off;
+                         script_threads[0].flags.disabled = 0;
+                         last_mode = MODE_OFF;
+                    }
+                    off_count++;
+                    if(off_count>200) {
+                        //set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+                        //sleep_mode();
+                    }
+                    break;
+
 
             }
             continue;
@@ -292,19 +312,119 @@ int main(void) {
         /* check if we received something via ir */
         if (global_rc5.new_data) {
             static uint8_t toggle_bit = 2;
-
             /* if key has been pressed again */
             if (global_rc5.received_command.toggle_bit != toggle_bit) {
 
-                /* if code is 0x01 (key '1' on a default remote) */
-                if (global_rc5.received_command.code == 0x01) {
+                switch(global_rc5.received_command.code) {
+                    case REMOTE_1: //R+
+                        mode = MODE_FIXED;
+                        if(global_pwm.channels[0].target_brightness <= 245) {
+                            global_pwm.channels[0].target_brightness += 10;
+                        }
+                        else {
+                            global_pwm.channels[0].target_brightness = 255;
+                        }
+                        break;
+                    case REMOTE_2: //G+
+                        mode = MODE_FIXED;
+                        if(global_pwm.channels[1].target_brightness <= 245) {
+                            global_pwm.channels[1].target_brightness += 10;
+                        }
+                        else {
+                            global_pwm.channels[1].target_brightness = 255;
+                        }
+                        break;
+                    case REMOTE_3: //B+
+                        mode = MODE_FIXED;
+                        if(global_pwm.channels[2].target_brightness <= 245) {
+                            global_pwm.channels[2].target_brightness += 10;
+                        }
+                        else {
+                            global_pwm.channels[2].target_brightness =255;
+                        }
+                        break;
+                    case REMOTE_4: //R-
+                        mode = MODE_FIXED;
+                        if(global_pwm.channels[0].target_brightness >= 10) {
+                            global_pwm.channels[0].target_brightness -= 10;
+                        }
+                        else {
+                            global_pwm.channels[0].target_brightness = 0;
+                        }
+                        break;
+                    case REMOTE_5: //G-
+                        mode = MODE_FIXED;
+                        if(global_pwm.channels[1].target_brightness >= 10) {
+                            global_pwm.channels[1].target_brightness -= 10;
+                        }
+                        else {
+                            global_pwm.channels[1].target_brightness = 0;
+                        }
+                        break;
+                    case REMOTE_6: //B-
+                        mode = MODE_FIXED;
+                        if(global_pwm.channels[2].target_brightness >= 10) {
+                            global_pwm.channels[2].target_brightness -= 10;
+                        }
+                        else {
+                            global_pwm.channels[2].target_brightness = 0;
+                        }
+                        break;
+                    case REMOTE_7:
+                        mode = MODE_CHILL;
+                        break;
+                    case REMOTE_8:
+                        mode = MODE_MORNING;
+                        break;
+                    case REMOTE_9:
+                        mode = MODE_DAY;
+                        break;
+                    case REMOTE_POWER:
+                        mode = MODE_OFF;
+                        break;
+                    case REMOTE_VD:
+                        mode = MODE_FIXED;
+                        if(global_pwm.channels[0].target_brightness >= 10) {
+                            global_pwm.channels[0].target_brightness -= 10;
+                        }
+                        else {
+                            global_pwm.channels[0].target_brightness = 0;
+                        }
+                        if(global_pwm.channels[1].target_brightness >= 10) {
+                            global_pwm.channels[1].target_brightness -= 10;
+                        }
+                        else {
+                            global_pwm.channels[1].target_brightness = 0;
+                        }
+                        if(global_pwm.channels[2].target_brightness >= 10) {
+                            global_pwm.channels[2].target_brightness -= 10;
+                        }
+                        else {
+                            global_pwm.channels[2].target_brightness = 0;
+                        }
+                        break;
+                    case REMOTE_VU:
+                        mode = MODE_FIXED;
+                        if(global_pwm.channels[0].target_brightness <= 245) {
+                            global_pwm.channels[0].target_brightness += 10;
+                        }
+                        else {
+                            global_pwm.channels[0].target_brightness =255;
+                        }
+                        if(global_pwm.channels[1].target_brightness <= 245) {
+                            global_pwm.channels[1].target_brightness += 10;
+                        }
+                        else {
+                            global_pwm.channels[1].target_brightness =255;
+                        }
+                        if(global_pwm.channels[2].target_brightness <= 245) {
+                            global_pwm.channels[2].target_brightness += 10;
+                        }
+                        else {
+                            global_pwm.channels[2].target_brightness =255;
+                        }
 
-                    /* install script into thread 1 */
-                    script_threads[1].handler.execute = &memory_handler_flash;
-                    script_threads[1].handler.position = (uint16_t) &green_flash;
-                    script_threads[1].flags.disabled = 0;
-                    script_threads[1].handler_stack_offset = 0;
-
+                        break;
                 }
 
                 /* store new toggle bit state */
