@@ -1,0 +1,13 @@
+#ifndef RANDOM_H
+#define RANDOM_H
+
+#include "config.h"
+#include <stdint.h>
+
+#define PRAND_START 0x2B73
+
+
+uint8_t prand(void);
+
+
+#endif
