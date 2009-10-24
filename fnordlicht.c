@@ -59,7 +59,7 @@
 /* structs */
 volatile struct global_t global = {{0, 0}};
 uint8_t mode=MODE_CHILL;
-uint8_t last_mode = MODE_NORMAL;
+uint8_t last_mode = MODE_OFF;
 
 /* prototypes */
 void (*jump_to_bootloader)(void) = (void *)0xc00;
@@ -166,31 +166,6 @@ int main(void) {
 
 #if STATIC_SCRIPTS
     init_script_threads();
-
-    #if RS485_CTRL == 0
-    /* start the example scripts */
-    //script_threads[0].handler.execute = &memory_handler_flash;
-    //script_threads[0].handler.position = (uint16_t) &colorchange_red;
-    //script_threads[0].flags.disabled = 0;
-
-    //script_threads[1].handler.execute = &memory_handler_flash;
-    //script_threads[1].handler.position = (uint16_t) &testscript_flash2;
-    //script_threads[1].flags.disabled = 0;
-
-    //script_threads[0].handler.execute = &memory_handler_flash;
-    //script_threads[0].handler.position = (uint16_t) &blinken;
-    //script_threads[0].flags.disabled = 0;
-
-    //
-    //script_threads[2].handler.execute = &memory_handler_eeprom;
-    //script_threads[2].handler.position = (uint16_t) &testscript_eeprom;
-    //script_threads[2].flags.disabled = 0;
-
-    //script_threads[0].handler.execute = &memory_handler_flash;
-    //script_threads[0].handler.position = (uint16_t) &blinken;
-    //script_threads[0].flags.disabled = 0;
-    #endif
-
 #endif
 
 #if I2C_MASTER
@@ -238,9 +213,7 @@ int main(void) {
             execute_script_threads();
 #endif
             switch(mode) {
-                case MODE_NORMAL:
-                    break;
-                /* slowly fade through the rainbow colors */
+                /*displays different colors between red and yellow*/
                 case MODE_CHILL:
                     if(last_mode != MODE_CHILL) {
                          script_threads[0].handler.execute = &memory_handler_flash;
@@ -249,6 +222,8 @@ int main(void) {
                          last_mode = MODE_CHILL;
                     }
                     break;
+
+                /*fresh colors (mainly blue and green)*/
                 case MODE_MORNING:
                     if(last_mode != MODE_MORNING) {
                          script_threads[0].handler.execute = &memory_handler_flash;
@@ -257,6 +232,8 @@ int main(void) {
                          last_mode = MODE_MORNING;
                     }
                     break;
+
+                /*shows bright colors*/
                 case MODE_DAY:
                     if(last_mode != MODE_DAY) {
                          script_threads[0].handler.execute = &memory_handler_flash;
@@ -275,6 +252,8 @@ int main(void) {
                          last_mode = MODE_FIXED;
                     }
                     break;
+
+                /*slowly fades the current color out to deactivate the light*/
                 case MODE_OFF:
                     if(last_mode != MODE_OFF) {
                          count=0;
@@ -286,12 +265,9 @@ int main(void) {
                          script_threads[0].flags.disabled = 0;
                          last_mode = MODE_OFF;
                     }
-                    count++;
-                    if(count>200) {
-                        //set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-                        //sleep_mode();
-                    }
                     break;
+
+                /*slowly fade through random generated colors*/
                 case MODE_RANDOM:
                     if(last_mode != MODE_RANDOM) {
                         last_mode = MODE_RANDOM;
