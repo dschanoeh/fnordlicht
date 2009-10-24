@@ -278,12 +278,23 @@ int main(void) {
                         global_pwm.channels[1].speed = 16;
                         global_pwm.channels[2].speed = 16;
 
-                        count = 0;
+                        count = 2049;
                     }
                     if(count > 2048) {
                         global_pwm.channels[0].target_brightness = prand();
                         global_pwm.channels[1].target_brightness = prand();
                         global_pwm.channels[2].target_brightness = prand();
+
+                        /*check if we generated a very dark color and light it up (light up one random component)*/
+                        if((global_pwm.channels[0].target_brightness + global_pwm.channels[1].target_brightness + global_pwm.channels[2].target_brightness) < 96) {
+                            count = prand();
+                            if(count < 85)
+                                global_pwm.channels[0].target_brightness += 96;
+                            else if(count > 170)
+                                global_pwm.channels[2].target_brightness += 96;
+                            else
+                                global_pwm.channels[1].target_brightness += 96;
+                        }
                         count = 0;
                     }
                     count++;
@@ -305,7 +316,8 @@ int main(void) {
         /* check if we received something via ir */
         if (global_rc5.new_data) {
             static uint8_t toggle_bit = 2;
-            /* if key has been pressed again */
+
+            /* commands that are only occure once when key is pressed*/
             if (global_rc5.received_command.toggle_bit != toggle_bit) {
 
                 switch(global_rc5.received_command.code) {
@@ -422,6 +434,67 @@ int main(void) {
 
                         break;
                 }
+            }
+            /*color is also increased or decreased when you hold a key*/
+            else {
+                switch(global_rc5.received_command.code) {
+                    case REMOTE_1: //R+
+                        mode = MODE_FIXED;
+                        if(global_pwm.channels[0].target_brightness <= 235) {
+                            global_pwm.channels[0].target_brightness += 20;
+                        }
+                        else {
+                            global_pwm.channels[0].target_brightness = 255;
+                        }
+                        break;
+                    case REMOTE_2: //G+
+                        mode = MODE_FIXED;
+                        if(global_pwm.channels[1].target_brightness <= 235) {
+                            global_pwm.channels[1].target_brightness += 20;
+                        }
+                        else {
+                            global_pwm.channels[1].target_brightness = 255;
+                        }
+                        break;
+                    case REMOTE_3: //B+
+                        mode = MODE_FIXED;
+                        if(global_pwm.channels[2].target_brightness <= 235) {
+                            global_pwm.channels[2].target_brightness += 20;
+                        }
+                        else {
+                            global_pwm.channels[2].target_brightness =255;
+                        }
+                        break;
+                    case REMOTE_4: //R-
+                        mode = MODE_FIXED;
+                        if(global_pwm.channels[0].target_brightness >= 20) {
+                            global_pwm.channels[0].target_brightness -= 20;
+                        }
+                        else {
+                            global_pwm.channels[0].target_brightness = 0;
+                        }
+                        break;
+                    case REMOTE_5: //G-
+                        mode = MODE_FIXED;
+                        if(global_pwm.channels[1].target_brightness >= 20) {
+                            global_pwm.channels[1].target_brightness -= 20;
+                        }
+                        else {
+                            global_pwm.channels[1].target_brightness = 0;
+                        }
+                        break;
+                    case REMOTE_6: //B-
+                        mode = MODE_FIXED;
+                        if(global_pwm.channels[2].target_brightness >= 20) {
+                            global_pwm.channels[2].target_brightness -= 20;
+                        }
+                        else {
+                            global_pwm.channels[2].target_brightness = 0;
+                        }
+                        break;
+                }
+                
+            
 
                 /* store new toggle bit state */
                 toggle_bit = global_rc5.received_command.toggle_bit;

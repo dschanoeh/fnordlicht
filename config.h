@@ -123,7 +123,7 @@
 #define AT_KEYBOARD 0
 #endif
 
-/* disable rc5-decoder per default */
+/* enable rc5-decoder per default */
 #ifndef RC5_DECODER
 #define RC5_DECODER 1
 #endif
