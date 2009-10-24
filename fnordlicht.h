@@ -7,6 +7,7 @@
  *
  * (c) by Alexander Neumann <alexander@bumpern.de>
  *     Lars Noschinski <lars@public.noschinski.de>
+ *     Jan-Niklas Meier <dschanoeh@googlemail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -45,8 +46,6 @@ extern uint8_t mode;
 
 #define MODE_NORMAL 	0
 #define MODE_RANDOM 	1
-#define MODE_PGM1 	2
-#define MODE_PGM2 	3
 #define MODE_FIXED 	4
 #define MODE_OFF        5
 #define MODE_CHILL	6

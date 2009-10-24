@@ -41,7 +41,7 @@ DEBUG = 1
 # avrdude programmer protocol
 PROG = stk500v2
 # avrdude programmer device
-DEV = /dev/ttyACM0
+DEV = /dev/ttyACM1
 # further flags for avrdude
 AVRDUDE_FLAGS =
 

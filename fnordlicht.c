@@ -7,6 +7,7 @@
  *
  * (c) by Alexander Neumann <alexander@bumpern.de>
  *     Lars Noschinski <lars@public.noschinski.de>
+ *     Jan-Niklas Meier <dschanoeh@googlemail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -38,6 +39,7 @@
 #include "pwm.h"
 #include "uart.h"
 #include "i2c.h"
+#include "random.h"
 
 #include <avr/sleep.h>
 
@@ -141,7 +143,11 @@ void check_serial_input(uint8_t data)
 /** main function
  */
 int main(void) {
-    uint16_t off_count=0;
+    uint16_t count=0;
+    uint8_t rand_channels[3];
+    uint8_t i;
+    int8_t rand_changes[3];
+
     init_output();
     init_pwm();
 
@@ -157,8 +163,6 @@ int main(void) {
     init_i2c();
 #endif
 
-    global_pwm.channels[0].brightness = 50;
-    global_pwm.channels[0].target_brightness = 50;
 
 #if STATIC_SCRIPTS
     init_script_threads();
@@ -273,7 +277,7 @@ int main(void) {
                     break;
                 case MODE_OFF:
                     if(last_mode != MODE_OFF) {
-                         off_count=0;
+                         count=0;
                          script_threads[0].flags.disabled = 1;
                          script_threads[1].flags.disabled = 1;
                          script_threads[2].flags.disabled = 1;
@@ -282,21 +286,34 @@ int main(void) {
                          script_threads[0].flags.disabled = 0;
                          last_mode = MODE_OFF;
                     }
-                    off_count++;
-                    if(off_count>200) {
+                    count++;
+                    if(count>200) {
                         //set_sleep_mode(SLEEP_MODE_PWR_DOWN);
                         //sleep_mode();
                     }
                     break;
+                case MODE_RANDOM:
+                    if(last_mode != MODE_RANDOM) {
+                        last_mode = MODE_RANDOM;
+                        script_threads[0].flags.disabled = 1;
+                        script_threads[1].flags.disabled = 1;
+                        script_threads[2].flags.disabled = 1;
+                        global_pwm.channels[0].speed = 16;
+                        global_pwm.channels[1].speed = 16;
+                        global_pwm.channels[2].speed = 16;
 
-
+                        count = 0;
+                    }
+                    if(count > 2048) {
+                        global_pwm.channels[0].target_brightness = prand();
+                        global_pwm.channels[1].target_brightness = prand();
+                        global_pwm.channels[2].target_brightness = prand();
+                        count = 0;
+                    }
+                    count++;
             }
             continue;
         }
-
-
-
-
 
 
 #if SERIAL_UART
@@ -378,6 +395,9 @@ int main(void) {
                         break;
                     case REMOTE_9:
                         mode = MODE_DAY;
+                        break;
+                    case REMOTE_0:
+                        mode = MODE_RANDOM;
                         break;
                     case REMOTE_POWER:
                         mode = MODE_OFF;

@@ -24,10 +24,12 @@
  * http://www.gnu.org/copyleft/gpl.html
  }}} */
 
+/* pseudorandom generator which uses a linear feedback shift register of 16bit to generate 8bit numbers. see http://de.wikipedia.org/wiki/LFSR for more information. the code is not speed optimized but works;*/
+
 #include <stdint.h>
 #include "random.h"
 
-
+/*preset register with defined startvalue*/
 uint16_t lfsr = PRAND_START;
 
 uint8_t prand() {
@@ -44,7 +46,7 @@ uint8_t prand() {
         bit5 = (lfsr & 0b00010000) >> 5;
         bit16 = ((bit0 ^ bit2) ^ bit3) ^ bit5;
         lfsr >>= 1;
-        /*if bit16 should be set, set it in lfsr*/
+        /*if bit16 should be set, set it in shift register*/
         if(bit16)
             lfsr |= 0x8000;
     }
